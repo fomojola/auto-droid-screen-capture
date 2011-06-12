@@ -1,0 +1,76 @@
+<?xml version="1.0" ?>
+<project name="DroidScreen" default="package">
+    <property file="${user.home}/.${ant.project.name}-build.properties"/>
+    <property file="${user.home}/.build.properties"/>
+    <property file=".build.properties"/>
+    <property file="build.properties"/>
+
+    <!-- The intermediates directory -->
+    <property name="outdir" value="dist"/>
+
+    <!-- No user servicable parts below. -->
+
+    <!-- Input directories -->
+    <property name="srcdir" value="src/main/java"/>
+
+    <!-- Output directories -->
+    <property name="outdir-classes" value="${outdir}/classes"/>
+
+    <!-- The final package file to generate -->
+    <property name="out-package" value="${outdir}/${ant.project.name}.jar"/>
+
+    <condition property="aidl" value="${android-framework}" else="${android-framework}">
+        <os family="windows"/>
+    </condition>
+
+    <property name="android-jar" value="${sdk-folder}/android.jar"/>
+
+    <!-- Rules -->
+
+    <!-- Create the output directories if they don't exist yet. -->
+    <target name="dirs">
+        <mkdir dir="${outdir}"/>
+        <mkdir dir="${outdir-classes}"/>
+    </target>
+
+    <path id="run.class.path">
+      <pathelement path="${java.class.path}" />
+      <fileset dir="${outdir}"><include name="*.jar" /></fileset>
+      <pathelement path="${android-tools}/lib/ddmlib.jar" />
+      <fileset dir="lib"><include name="*.jar" /></fileset>
+    </path>
+
+    <!-- Compile this project's .java files into .class files. -->
+    <target name="compile" depends="dirs">
+        <javac encoding="ascii" target="1.5" debug="true" extdirs=""
+               destdir="${outdir-classes}"
+               bootclasspath="${android-jar}">
+            <classpath>
+                <fileset dir="${sdk-folder}/platforms/android-2.0">
+                    <include name="**/android.jar"/>
+                </fileset>
+                <fileset dir="${android-tools}">
+                    <include name="**/ddmlib.jar"/>
+                </fileset>
+                <fileset dir="lib">
+                    <include name="*.jar" />
+                </fileset>
+            </classpath>
+            <src>
+                <pathelement path="src"/>
+            </src>
+        </javac>
+    </target>
+
+    <target name="package" depends="compile">
+      <jar destfile="${ant.project.name}.jar" basedir="${outdir-classes}" includes="**/*.*">
+        <manifest>
+                <attribute name="Main-Class" value="com.ribomation.droidAtScreen.SaveScreenshots" />
+        </manifest>
+        <zipfileset src="lib/log4j-1.2.15.jar" />
+        <zipfileset src="${sdk-folder}/platforms/android-2.0/android.jar" />
+        <zipfileset src="${android-tools}/lib/ddmlib.jar" />
+	<fileset file="log4j.properties" />
+      </jar>      
+    </target>
+</project>
